@@ -1,38 +1,58 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { FlatListSlider } from 'react-native-flatlist-slider';
+import Utilities from '../components/Utilities';
+import axiosClient from '../axiosConfig/AxiosClient';
 
 const DetailRoom = ({ route }) => {
-    const { room } = route.params;
-    const data = [
-        {
-            data: room.urlImage
-        },
-        {
-            data: room.urlImage
+    const { roomId } = route.params;
+    const [room, setRoom] = useState({
+        images: [
+            {
+                link: ""
+            }
+        ],
+        utilities: [],
+        owner: {
+            phone: "",
+            fullname: ""
         }
-    ]
+    });
+
+    const fetchDetailRoom = () => {
+        axiosClient.get(`/detailRoom/${roomId}`)
+            .then(
+                res => setRoom(res.data)
+            )
+            .catch(
+                error => console.log(error)
+            );
+    }
+
+    useEffect(() => {
+        fetchDetailRoom();
+    }, []);
     return (
-        <ScrollView>
+        <ScrollView style={styles.container}>
             <FlatListSlider
-                data={data}
-                imageKey={'data'}
+                data={room.images}
+                imageKey={'link'}
                 indicatorContainerStyle={{ position: 'absolute', bottom: 10 }}
-                indicatorInActiveColor={'#ffffff'}
+                indicatorInActiveColor={'#fafafa'}
                 indicatorActiveWidth={10}
                 height={200}
                 animation
             />
             <View style={styles.description} >
-                <Text style={styles.title} >Cho thuê nhà nguyên căng 3.5 triệu</Text>
+                <Text style={styles.title} >{room.title}</Text>
                 <View style={styles.dFlexRow}>
                     <Ionicons style={styles.icon} name="location-outline" size={20} color="#4890E0" />
-                    <Text>{room.position}</Text>
+                    <Text>{room.address}</Text>
                 </View>
                 <View style={styles.dFlexRow}>
                     <Ionicons style={styles.icon} name="call" size={20} color="#4890E0" />
-                    <Text>0123456789 - Nguyen Van A</Text>
+                    <Text>{room.owner.phone} - {room.owner.fullname} </Text>
                 </View>
                 <View style={styles.dFlexRow}>
                     <Ionicons style={styles.icon} name="square-outline" size={20} color="#4890E0" />
@@ -40,9 +60,16 @@ const DetailRoom = ({ route }) => {
                 </View>
                 <View style={styles.dFlexRow}>
                     <Ionicons style={styles.icon} name="stopwatch-outline" size={20} color="#4890E0" />
-                    <Text>2 giờ</Text>
+                    <Text>{room.updateAt}</Text>
                 </View>
-                <Text style={styles.title} >Tiện ích phòng</Text>
+                <View>
+                    <Text style={styles.title} >Tiện ích phòng ({room.utilities.length})</Text>
+                    <Utilities utilities={room.utilities}/>
+                </View>
+                <View>
+                    <Text style={styles.title} >Mô tả chi tiết</Text>
+                    <Text>{room.detail} </Text>
+                </View>
             </View>
         </ScrollView>
     )
@@ -51,6 +78,9 @@ const DetailRoom = ({ route }) => {
 export default DetailRoom
 
 const styles = StyleSheet.create({
+    container : {
+        backgroundColor : "#fff"
+    },
     title: {
         color: "#4890E0",
         fontWeight: "600",
@@ -65,8 +95,8 @@ const styles = StyleSheet.create({
     icon: {
         marginRight: 5
     },
-    description : {
-        marginRight : 10,
-        marginLeft : 10
+    description: {
+        marginRight: 10,
+        marginLeft: 10
     }
 })

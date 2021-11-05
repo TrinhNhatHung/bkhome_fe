@@ -7,16 +7,16 @@ const Room = ({ room, navigation }) => {
         <TouchableOpacity 
             style={styles.touch} 
             activeOpacity={1} 
-            onPress={()=> navigation.navigate("Detail", {room})}
+            onPress={()=> navigation.navigate("Detail", {roomId : room.roomId, price : room.price})}
         >
             <View style={styles.container}>
                 <View style={styles.thumbnail}>
-                    <Image style={styles.image} source={{ uri: room.urlImage }} />
+                    <Image style={styles.image} source={{ uri: room.image }} />
                     <Text style={styles.price}>{room.price}</Text>
                 </View>
                 <View style={styles.dFlexRow}>
                     <Ionicons style={styles.icon} name="location-outline" size={20} color="#4890E0" />
-                    <Text>{room.position}</Text>
+                    <Text>{room.address}</Text>
                 </View>
                 <View style={styles.dFlexRow}>
                     <Ionicons style={styles.icon} name="square-outline" size={15} color="#4890E0" />

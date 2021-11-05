@@ -24,7 +24,7 @@ const HomeTab = () => {
                     }} />
                 <Stack.Screen name="Detail" component={DetailRoom}
                     options={({ route }) => ({
-                        title: `${route.params.room.price}`,
+                        title: `${route.params.price}`,
                         headerShadowVisible: false,
                         headerTintColor: "#4890E0",
                         headerTitleAlign: "center"

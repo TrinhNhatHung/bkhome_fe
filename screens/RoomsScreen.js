@@ -1,83 +1,66 @@
-import React, { useState } from 'react'
-import { FlatList, View, StyleSheet,TouchableOpacity, Text } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { FlatList, View, StyleSheet, TouchableOpacity, AsyncStorage } from 'react-native'
 import Room from '../components/Room';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import axiosClient from '../axiosConfig/AxiosClient';
+import { Alert } from 'react-native';
 
 const RoomsScreen = ({ navigation }) => {
-    const [data, setData] = useState([
-        {
-            id: 1,
-            price: 300000,
-            position: "237 Hùng Vương, Thanh Khê, Đà Nẵng",
-            area: 24,
-            urlImage: "https://dummyimage.com/193x100.png/000000/ffffff"
-        },
-        {
-            id: 2,
-            price: 300000,
-            position: "237 Hùng Vương, Thanh Khê, Đà Nẵng",
-            area: 24,
-            urlImage: "https://dummyimage.com/193x100.png/000000/ffffff"
-        },
-        {
-            id: 3,
-            price: 300000,
-            position: "237 Hùng Vương, Thanh Khê, Đà Nẵng",
-            area: 24,
-            urlImage: "https://dummyimage.com/193x100.png/000000/ffffff"
-        },
-        {
-            id: 1,
-            price: 300000,
-            position: "237 Hùng Vương, Thanh Khê, Đà Nẵng",
-            area: 24,
-            urlImage: "https://dummyimage.com/193x100.png/000000/ffffff"
-        },
-        {
-            id: 2,
-            price: 300000,
-            position: "237 Hùng Vương, Thanh Khê, Đà Nẵng",
-            area: 24,
-            urlImage: "https://dummyimage.com/193x100.png/ff4444/ffffff"
-        },
-        {
-            id: 3,
-            price: 300000,
-            position: "237 Hùng Vương, Thanh Khê, Đà Nẵng",
-            area: 24,
-            urlImage: "https://dummyimage.com/193x100.png/000000/ffffff"
-        },
-        {
-            id: 1,
-            price: 300000,
-            position: "237 Hùng Vương, Thanh Khê, Đà Nẵng",
-            area: 24,
-            urlImage: "https://dummyimage.com/193x100.png/000000/ffffff"
-        },
-        {
-            id: 2,
-            price: 300000,
-            position: "237 Hùng Vương, Thanh Khê, Đà Nẵng",
-            area: 24,
-            urlImage: "https://dummyimage.com/193x100.png/000000/ffffff"
-        },
-        {
-            id: 3,
-            price: 300000,
-            position: "237 Hùng Vương, Thanh Khê, Đà Nẵng",
-            area: 24,
-            urlImage: "https://dummyimage.com/193x100.png/000000/ffffff"
-        }
-    ]);
+    const [data, setData] = useState([]);
+
+    const fetchData = () => {
+        axiosClient.get("/rooms")
+            .then(
+                res => setData(res.data)
+            )
+            .catch(
+                error => console.log(error)
+            );
+    }
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const navigateToAddRoom = () => {
+        let token = "";
+        AsyncStorage.getItem("token")
+            .then((response) => {
+                token = response;
+                var config = {
+                    url: '/checkLogin',
+                    headers: {
+                        'content-type': 'application/x-www-form-urlencoded',
+                        'Authorization': token
+                    },
+                };
+
+                axiosClient(config)
+                    .then((response) => {
+                        if (response.data.isAuthenticated) {
+                            navigation.navigate("AddRoom");
+                        } else {
+                            Alert.alert("Bạn cần phải đăng nhập để thực hiện đăng tin");
+                        }
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    })
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+
     return (
         <View>
             <FlatList
                 data={data}
                 numColumns={2}
                 renderItem={({ item }) => <Room room={item} navigation={navigation} />}
-                keyExtractor={item => item.id}
+                keyExtractor={item => item.roomId}
             />
-            <TouchableOpacity activeOpacity={0.8} style={styles.fab} onPress={()=> navigation.navigate("AddRoom")}>
+            <TouchableOpacity activeOpacity={0.8} style={styles.fab} onPress={navigateToAddRoom}>
                 <Ionicons name="md-pencil-sharp" size={30} color="#fff" />
             </TouchableOpacity>
         </View>
@@ -99,11 +82,11 @@ const styles = StyleSheet.create({
         backgroundColor: '#E85858',
         borderRadius: 50,
         elevation: 8
-      },
-      fabIcon: {
+    },
+    fabIcon: {
         fontSize: 40,
         color: 'white'
-      }
+    }
 })
 
 export default RoomsScreen
