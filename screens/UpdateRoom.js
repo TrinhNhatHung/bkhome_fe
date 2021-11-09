@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
-import { View, StyleSheet, ScrollView, Image, AsyncStorage, ToastAndroid, Touchable, Text } from 'react-native';
-import { Button, Input } from 'react-native-elements';
+import React, { useEffect, useState } from 'react'
+import { View, ScrollView, StyleSheet, Image, AsyncStorage, ToastAndroid, Text } from 'react-native'
+import { Button, Input } from 'react-native-elements'
 import ActiveWifi from "../assets/wifiactive.png";
 import Wifi from "../assets/wifi.png";
 import ActiveWC from "../assets/wcactive.png";
@@ -22,7 +22,9 @@ import * as ImagePicker from 'expo-image-picker';
 import axiosClient from '../axiosConfig/AxiosClient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
-const ModalScreen = ({ navigation }) => {
+const UpdateRoom = ({ route, navigation }) => {
+
+    const { roomId } = route.params;
 
     const [utilities, setUtilities] = useState([]);
 
@@ -44,11 +46,11 @@ const ModalScreen = ({ navigation }) => {
         district: "",
         ward: "",
         address: "",
-        price: "",
-        area:  "",
+        price: null,
+        area: null,
         title: "",
         detail: "",
-        image : ""
+        image: ""
     });
 
     const defaultUtilities = [
@@ -105,6 +107,30 @@ const ModalScreen = ({ navigation }) => {
     const firstRow = defaultUtilities.slice(0, 4);
     const secondRow = defaultUtilities.slice(4, 8);
 
+    const fetchDetailRoom = () => {
+        axiosClient.get(`/detailRoom/${roomId}`)
+            .then(
+                res => {
+                    let strings = res.data.address.split(",");
+                    setRoom({
+                        ...res.data,
+                        city: strings[3],
+                        district: strings[2],
+                        ward: strings[1],
+                        address: strings[0]
+                    })
+                    setUtilities(res.data.utilities)
+                }
+            )
+            .catch(
+                error => console.log(error)
+            );
+    }
+
+    useEffect(() => {
+        fetchDetailRoom();
+    }, []);
+
     const pressUtilIcon = (utility) => {
         let position = utilities.indexOf(utility);
         let tmp = [...utilities];
@@ -127,7 +153,7 @@ const ModalScreen = ({ navigation }) => {
         let pickerResult = await ImagePicker.launchImageLibraryAsync();
         setRoom({
             ...room,
-            image : pickerResult.uri
+            image: pickerResult.uri
         })
     }
 
@@ -157,53 +183,53 @@ const ModalScreen = ({ navigation }) => {
             district: "",
             ward: "",
             address: "",
-            price: "",
-            area: "",
+            price: null,
+            area: null,
             title: "",
             detail: "",
             image : ""
         }
 
-        if (room.city === "") {
+        if (room.city === "" || room.city === undefined) {
             check = false;
             msg.city = "* Bắt buộc";
         }
 
-        if (room.district === "") {
+        if (room.district === "" || room.district === undefined) {
             check = false;
             msg.district = "* Bắt buộc";
         }
 
-        if (room.ward === "") {
+        if (room.ward === "" || room.ward === undefined) {
             check = false;
             msg.ward = "* Bắt buộc";
         }
-        if (room.address === "") {
+        if (room.address === "" || room.address === undefined) {
             check = false;
             msg.address = "* Bắt buộc";
         }
 
-        if (room.price === null) {
+        if (room.price === null || room.price === undefined || room.price === "") {
             check = false;
             msg.price = "* Bắt buộc";
         }
 
-        if (room.area === null) {
+        if (room.area === null || room.area === undefined || room.area === "") {
             check = false;
             msg.area = "* Bắt buộc";
         }
 
-        if (room.title === "") {
+        if (room.title === "" || room.title === undefined) {
             check = false;
             msg.title = "* Bắt buộc";
         }
 
-        if (room.detail === "") {
+        if (room.detail === "" || room.detail === undefined) {
             check = false;
             msg.detail = "* Bắt buộc";
         }
 
-        if (room.image === ""){
+        if (room.image === "") {
             check = false;
             msg.image = "* Bắt buộc";
         }
@@ -224,6 +250,7 @@ const ModalScreen = ({ navigation }) => {
                     data.append("title", postedRoom.title);
                     data.append("detail", postedRoom.detail);
                     data.append("address", postedRoom.address);
+                    data.append("id", roomId);
                     data.append("imageFile", {
                         name : "image.jpg",
                         uri : postedRoom.image,
@@ -237,8 +264,7 @@ const ModalScreen = ({ navigation }) => {
                         data,
                         headers: {
                             'Authorization': response,
-                            'Content-Type': 'multipart/form-data',
-                            'Accept' : 'application/json'
+                            ...data.getHeaders
                         },
                     };
 
@@ -264,7 +290,6 @@ const ModalScreen = ({ navigation }) => {
         }
 
     }
-
     return (
         <ScrollView style={styles.container}>
             <Input
@@ -274,6 +299,7 @@ const ModalScreen = ({ navigation }) => {
                 inputStyle={styles.input}
                 onChange={(event) => enterValue(event, "city")}
                 errorMessage={errorMsg.city}
+                value={room.city}
             />
             <Input
                 label={"Chọn Quận/Huyện"}
@@ -282,6 +308,7 @@ const ModalScreen = ({ navigation }) => {
                 inputStyle={styles.input}
                 onChange={(event) => enterValue(event, "district")}
                 errorMessage={errorMsg.district}
+                value={room.district}
             />
             <Input
                 label={"Phường/Xã"}
@@ -290,6 +317,7 @@ const ModalScreen = ({ navigation }) => {
                 inputStyle={styles.input}
                 onChange={(event) => enterValue(event, "ward")}
                 errorMessage={errorMsg.ward}
+                value={room.ward}
             />
             <Input
                 label={"Số nhà, tên đường"}
@@ -298,6 +326,7 @@ const ModalScreen = ({ navigation }) => {
                 inputStyle={styles.input}
                 onChange={(event) => enterValue(event, "address")}
                 errorMessage={errorMsg.address}
+                value={room.address}
             />
             <View style={styles.row} >
                 <View style={styles.col}>
@@ -309,6 +338,7 @@ const ModalScreen = ({ navigation }) => {
                         keyboardType="numeric"
                         onChange={(event) => enterValue(event, "price")}
                         errorMessage={errorMsg.price}
+                        value={"" + room.price}
                     />
                 </View>
                 <View style={styles.col}>
@@ -320,6 +350,7 @@ const ModalScreen = ({ navigation }) => {
                         keyboardType="numeric"
                         onChange={(event) => enterValue(event, "area")}
                         errorMessage={errorMsg.area}
+                        value={"" + room.area}
                     />
                 </View>
             </View>
@@ -342,6 +373,7 @@ const ModalScreen = ({ navigation }) => {
                 inputStyle={styles.input}
                 onChange={(event) => enterValue(event, "title")}
                 errorMessage={errorMsg.title}
+                value={room.title}
             />
             <Input
                 label={"Mô tả"}
@@ -352,28 +384,29 @@ const ModalScreen = ({ navigation }) => {
                 numberOfLines={5}
                 onChange={(event) => enterValue(event, "detail")}
                 errorMessage={errorMsg.detail}
+                value={room.detail}
             />
-            <TouchableOpacity 
+            <TouchableOpacity
                 style={styles.pickImage}
-                onPress= {openImagePickerAsync}
+                onPress={openImagePickerAsync}
             >
                 <Ionicons name="image" size={30} color="#4890E0" />
                 <Text style={styles.text}>Chọn ảnh</Text>
             </TouchableOpacity>
             <View style={styles.pickedImageContainer}>
-                <Image style={styles.pickedImage} source={{uri : room.image}} />
+                <Image style={styles.pickedImage} source={{ uri: room.image }} />
             </View>
             <Text style={styles.error}>{errorMsg.image}</Text>
             <Button
                 buttonStyle={styles.btn}
-                title="Đăng"
+                title="Cập nhật"
                 onPress={submit}
             />
         </ScrollView>
     )
 }
 
-export default ModalScreen;
+export default UpdateRoom
 
 const styles = StyleSheet.create({
     container: {
@@ -387,6 +420,8 @@ const styles = StyleSheet.create({
         paddingLeft: 15,
         paddingRight: 5,
         marginTop: 5
+    },
+    input: {
     },
     row: {
         flexDirection: "row"
@@ -409,8 +444,7 @@ const styles = StyleSheet.create({
     btn: {
         marginRight: 10,
         marginLeft: 10,
-        marginBottom: 20,
-        marginTop : 10
+        marginBottom: 20
     },
     pickImage : {
         width : "35%",
@@ -423,24 +457,24 @@ const styles = StyleSheet.create({
         marginLeft : 5,
         color : "#4890E0"
     },
-    pickedImageContainer : {
-        height : 200,
-        marginLeft : 10,
-        marginRight : 10,
-        marginBottom : 5,
-        borderColor : "#B3B7C0",
-        borderStyle : "solid",
-        borderWidth : 1,
-        borderRadius : 5
+    pickedImageContainer: {
+        height: 200,
+        marginLeft: 10,
+        marginRight: 10,
+        marginBottom: 5,
+        borderColor: "#B3B7C0",
+        borderStyle: "solid",
+        borderWidth: 1,
+        borderRadius: 5
     },
-    pickedImage : {
-        height : 100,
-        width : 70,
-        margin : 10
+    pickedImage: {
+        height: 100,
+        width: 70,
+        margin: 10
     },
-    error : {
-        marginLeft : 15,
-        color : "red",
-        fontSize : 12
+    error: {
+        marginLeft: 15,
+        color: "red",
+        fontSize: 12
     }
 })

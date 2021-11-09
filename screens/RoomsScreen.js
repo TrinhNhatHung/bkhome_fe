@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { FlatList, View, StyleSheet, TouchableOpacity, AsyncStorage } from 'react-native'
+import { FlatList, View, StyleSheet, TouchableOpacity, AsyncStorage, RefreshControl } from 'react-native'
 import Room from '../components/Room';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import axiosClient from '../axiosConfig/AxiosClient';
@@ -8,10 +8,15 @@ import { Alert } from 'react-native';
 const RoomsScreen = ({ navigation }) => {
     const [data, setData] = useState([]);
 
+    const [refreshing, setFreshing] = useState(false);
+
     const fetchData = () => {
         axiosClient.get("/rooms")
             .then(
-                res => setData(res.data)
+                res => {
+                    setData(res.data);
+                    setFreshing(false);
+                }
             )
             .catch(
                 error => console.log(error)
@@ -52,9 +57,20 @@ const RoomsScreen = ({ navigation }) => {
             });
     }
 
+    const onRefresh = ()=> {
+        setFreshing(true);
+        fetchData();
+    }
+
     return (
         <View>
             <FlatList
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />
+                }
                 data={data}
                 numColumns={2}
                 renderItem={({ item }) => <Room room={item} navigation={navigation} />}

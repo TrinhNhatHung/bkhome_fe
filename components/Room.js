@@ -16,11 +16,11 @@ const Room = ({ room, navigation }) => {
                 </View>
                 <View style={styles.dFlexRow}>
                     <Ionicons style={styles.icon} name="location-outline" size={20} color="#4890E0" />
-                    <Text>{room.address}</Text>
+                    <Text style={styles.text}>{room.address}</Text>
                 </View>
                 <View style={styles.dFlexRow}>
                     <Ionicons style={styles.icon} name="square-outline" size={15} color="#4890E0" />
-                    <Text>DT: {room.area} m2</Text>
+                    <Text style={styles.text}>DT: {room.area} m2</Text>
                 </View>
             </View>
         </TouchableOpacity>
@@ -61,5 +61,9 @@ const styles = StyleSheet.create({
     },
     icon: {
         marginRight: 5
+    },
+    text : {
+        width : 135,
+        fontSize : 12
     }
 })

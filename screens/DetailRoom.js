@@ -1,18 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Image, ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native'
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { FlatListSlider } from 'react-native-flatlist-slider';
 import Utilities from '../components/Utilities';
 import axiosClient from '../axiosConfig/AxiosClient';
 
 const DetailRoom = ({ route }) => {
     const { roomId } = route.params;
     const [room, setRoom] = useState({
-        images: [
-            {
-                link: ""
-            }
-        ],
+        image: "",
         utilities: [],
         owner: {
             phone: "",
@@ -20,10 +15,15 @@ const DetailRoom = ({ route }) => {
         }
     });
 
+    const [refreshing, setRefeshing] = useState(false);
+
     const fetchDetailRoom = () => {
         axiosClient.get(`/detailRoom/${roomId}`)
             .then(
-                res => setRoom(res.data)
+                res => {
+                    setRoom(res.data)
+                    setRefeshing(false);
+                }
             )
             .catch(
                 error => console.log(error)
@@ -33,17 +33,23 @@ const DetailRoom = ({ route }) => {
     useEffect(() => {
         fetchDetailRoom();
     }, []);
+
+    const onRefresh = ()=> {
+        setRefeshing(true);
+        fetchDetailRoom();
+    }
+
     return (
-        <ScrollView style={styles.container}>
-            <FlatListSlider
-                data={room.images}
-                imageKey={'link'}
-                indicatorContainerStyle={{ position: 'absolute', bottom: 10 }}
-                indicatorInActiveColor={'#fafafa'}
-                indicatorActiveWidth={10}
-                height={200}
-                animation
-            />
+        <ScrollView 
+            style={styles.container}
+            refreshControl={
+                <RefreshControl 
+                    refreshing={refreshing}
+                    onRefresh= {onRefresh}
+                />
+            }
+        >
+            <Image style={styles.image} source={{uri :room.image}} />
             <View style={styles.description} >
                 <Text style={styles.title} >{room.title}</Text>
                 <View style={styles.dFlexRow}>
@@ -98,5 +104,8 @@ const styles = StyleSheet.create({
     description: {
         marginRight: 10,
         marginLeft: 10
+    },
+    image :  {
+        height : 200
     }
 })

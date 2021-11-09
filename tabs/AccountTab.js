@@ -4,6 +4,8 @@ import AccountScreen from '../screens/AccountScreen';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import PostedRoomScreen from '../screens/PostedRoomScreen';
+import UpdateableRoom from '../screens/UpdateableRoom';
+import UpdateRoom from '../screens/UpdateRoom';
 
 const Stack = createNativeStackNavigator();
 
@@ -11,7 +13,7 @@ const AccountTab = () => {
 
     return (
         <Stack.Navigator
-            initialRouteName={ "Profile"}
+            initialRouteName={"Profile"}
         >
             <Stack.Screen name="Profile" component={AccountScreen}
                 options={{
@@ -43,8 +45,26 @@ const AccountTab = () => {
                     headerShadowVisible: false,
                     headerTintColor: "#4890E0",
                     headerTitleAlign: "center",
-                    headerShown : false
+                    headerShown: false
                 }}
+            />
+            <Stack.Screen name="UpdateableRoom" component={UpdateableRoom}
+                options={{
+                    title: "Phòng đã đăng",
+                    headerShadowVisible: false,
+                    headerTintColor: "#4890E0",
+                    headerTitleAlign: "center",
+                    headerShown: false
+                }}
+            />
+
+            <Stack.Screen name="UpdateRoom" component={UpdateRoom}
+                options={({ route }) => ({
+                        title: `${route.params.price}`,
+                        headerShadowVisible: false,
+                        headerTintColor: "#4890E0",
+                        headerTitleAlign: "center"
+                    })}
             />
         </Stack.Navigator>
     )

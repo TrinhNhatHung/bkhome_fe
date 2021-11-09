@@ -22,41 +22,49 @@ const Utilities = ({ utilities }) => {
 
     const defaultUtilities = [
         {
+            id : 1,
             utility: "Wifi",
             icon: Wifi,
             activeIcon: ActiveWifi
         },
         {
+            id : 2,
             utility: "WC riêng",
             icon: WC,
             activeIcon: ActiveWC
         },
         {
+            id : 3,
             utility: "Giữ xe",
             icon: GiuXe,
             activeIcon: ActiveGiuXe
         },
         {
+            id : 4,
             utility: "Tự do",
             icon: Free,
             activeIcon: ActiveFree
         },
         {
+            id : 5,
             utility: "Bếp",
             icon: Bep,
             activeIcon: ActiveBep
         },
         {
+            id : 6,
             utility: "Điều hòa",
             icon: DieuHoa,
             activeIcon: ActiveDieuHoa
         },
         {
+            id : 7,
             utility: "Tủ lạnh",
             icon: Tulanh,
             activeIcon: ActiveTulanh
         },
         {
+            id : 8,
             utility: "Máy giặt",
             icon: MayGiat,
             activeIcon: ActiveMayGiat
@@ -72,7 +80,7 @@ const Utilities = ({ utilities }) => {
             <View style={styles.rowIcons}>
                 {
                     firstRow.map((item, index) => {
-                        if (utilities.indexOf(item.utility) !== -1) {
+                        if (utilities.indexOf(item.id) !== -1) {
                            return <Image key={index} style={styles.icon} source={item.activeIcon} />
                         }
                         return <Image style={styles.icon} source={item.icon} />
@@ -82,7 +90,7 @@ const Utilities = ({ utilities }) => {
             <View style={styles.rowIcons}>
                 {
                     secondRow.map((item, index) => {
-                        if (utilities.indexOf(item.utility) !== -1) {
+                        if (utilities.indexOf(item.id) !== -1) {
                            return <Image key={index} style={styles.icon} source={item.activeIcon} />
                         }
                         return <Image style={styles.icon} source={item.icon} />

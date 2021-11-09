@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, FlatList, StyleSheet, Image, Text, AsyncStorage, Alert, ToastAndroid } from 'react-native'
+import { View, FlatList, StyleSheet, Image, Text, AsyncStorage, Alert, ToastAndroid, RefreshControl } from 'react-native'
 import { Header } from 'react-native-elements';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -16,15 +16,15 @@ const PostedRoom = ({ room }) => {
                 <Text style={stylePostedRoom.title}>{room.title}</Text>
                 <View style={stylePostedRoom.row}>
                     <Ionicons style={stylePostedRoom.icon} name="location-outline" size={20} color="#4890E0" />
-                    <Text>{room.address}</Text>
+                    <Text style={stylePostedRoom.text}>{room.address}</Text>
                 </View>
                 <View style={stylePostedRoom.row}>
                     <Ionicons style={stylePostedRoom.icon} name="square-outline" size={20} color="#4890E0" />
-                    <Text>DT {room.area} m2</Text>
+                    <Text style={stylePostedRoom.text}>DT {room.area} m2</Text>
                 </View>
                 <View style={stylePostedRoom.row}>
                     <Ionicons style={stylePostedRoom.icon} name="stopwatch-outline" size={20} color="#4890E0" />
-                    <Text>{room.updateAt}</Text>
+                    <Text style={stylePostedRoom.text}>{room.updateAt}</Text>
                 </View>
             </View>
         </View>
@@ -67,11 +67,16 @@ const stylePostedRoom = StyleSheet.create({
         color: "#4890E0",
         fontSize: 17,
         fontWeight: "bold"
+    },
+    text : {
+        width : 185
     }
 });
 
 const PostedRoomScreen = ({ navigation }) => {
     const [data, setData] = useState([]);
+
+    const [refreshing, setFreshing] = useState(false);
 
     const [selectedRoom, setSelectedRoom] = useState([]);
 
@@ -102,6 +107,7 @@ const PostedRoomScreen = ({ navigation }) => {
                 axiosClient(config)
                     .then((response) => {
                         setData(response.data);
+                        setFreshing(false);
                     })
                     .catch((error) => {
                         console.log(error);
@@ -124,7 +130,7 @@ const PostedRoomScreen = ({ navigation }) => {
         AsyncStorage.getItem("token")
             .then((response) => {
                 var data = qs.stringify({
-                    rooms : selectedRoom
+                    rooms: selectedRoom
                 });
                 var config = {
                     url: '/deleteRooms',
@@ -173,8 +179,15 @@ const PostedRoomScreen = ({ navigation }) => {
         );
     }
 
+    const onRefresh = () => {
+        setFreshing(true);
+        fetchData();
+    }
+
     return (
-        <View style={styles.container}>
+        <View
+            style={styles.container}
+        >
             <Header
                 leftComponent={{ icon: 'arrow-back', color: '#4890E0', onPress: () => navigation.goBack() }}
                 centerComponent={{ text: 'Phòng đã đăng', style: { color: '#4890E0', fontSize: 20, fontWeight: "bold" } }}
@@ -187,9 +200,19 @@ const PostedRoomScreen = ({ navigation }) => {
                 statusBarProps={{ backgroundColor: "#4890E0" }}
             />
             <FlatList
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />
+                }
                 style={styles.list}
                 data={data}
-                renderItem={({ item }) => <TouchableOpacity style={styles.item} onLongPress={() => addSelectedRoom(item.roomId)}>
+                renderItem={({ item }) => <TouchableOpacity
+                    style={styles.item}
+                    onLongPress={() => addSelectedRoom(item.roomId)}
+                    onPress={() => navigation.navigate("UpdateableRoom", { roomId: item.roomId })}
+                >
                     <PostedRoom room={item} />
                     {checkActive(item.roomId) && <Ionicons style={styles.icon} name="checkmark-circle-sharp" size={35} color="#E85858" />}
                 </TouchableOpacity>}
@@ -207,7 +230,7 @@ const styles = StyleSheet.create({
     },
     list: {
         marginTop: 15,
-        marginBottom : 70
+        marginBottom: 70
     },
     item: {
         position: "relative"
